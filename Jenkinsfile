@@ -110,7 +110,24 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                sh 'docker push santhoshawsdocker/board:latest'
+                withCredentials([usernamePassword(credentialsId: 'docker-cred',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS')]) {
+                    sh '''
+                        docker login -u $USER -p $PASS
+                        docker push santhoshawsdocker/board:latest
+                    '''
+                }
+            }
+        }
+        
+        
+                    stage('Docker running') {
+            steps {
+                sh '''docker rm -f boardcontainer || true
+                        docker run -itd --name boardcontainer -p 8082:8080 santhoshawsdocker/board:latest
+                        docker ps
+                        '''
             }
         }
     }
